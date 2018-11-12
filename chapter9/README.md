@@ -1,5 +1,7 @@
 [Hands-on Machine Learning with Scikit-Learn and TensorFlow](https://github.com/ageron/handson-ml)の第９章のまとめ。
 この本の第1章~第4章までを理解出来ている方が望ましいです。
+
+
 [![book](http://akamaicovers.oreilly.com/images/0636920052289/cat.gif)](http://shop.oreilly.com/product/0636920052289.do)
 
 # グラフ作成をセッション内での実行
