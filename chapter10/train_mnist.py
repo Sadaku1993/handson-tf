@@ -1,8 +1,14 @@
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/")
+
+from datetime import datetime
+now = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+root_logdir = "tf_logs"
+logdir = "{}/run-{}/".format(root_logdir, now)
 
 learning_rate = 0.01
 
@@ -21,11 +27,10 @@ with tf.name_scope("dnn"):
 
 with tf.name_scope("loss"):
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=logits)
-    loss = tf.reduce_mean(cross_entropy, name="loss")
 
 with tf.name_scope("train"):
     optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-    training_op = optimizer.minimize(loss)
+    training_op = optimizer.minimize(cross_entropy)
 
 with tf.name_scope("eval"):
     correct = tf.nn.in_top_k(logits, y, 1)
@@ -34,18 +39,31 @@ with tf.name_scope("eval"):
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-n_epochs = 40
+train_accuracy_summary = tf.summary.scalar('acc_train', accuracy)
+validation_accuracy_summary = tf.summary.scalar('acc_validation', accuracy)
+file_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+
+n_epochs = 1000
 batch_size = 50
+
+acc_trains = []
+acc_vals = []
 
 with tf.Session() as sess:
     init.run()
 
     for epoch in range(n_epochs):
-        for iteration in range(mnist.train.num_examples // batch_size):
-            X_batch, y_batch = mnist.train.next_batch(batch_size)
-            sess.run(training_op, feed_dict={X:X_batch, y:y_batch})
-        acc_train = accuracy.eval(feed_dict={X:X_batch, y:y_batch})
-        acc_val = accuracy.eval(feed_dict={X:mnist.validation.images,
+        X_batch, y_batch = mnist.train.next_batch(batch_size)
+        sess.run(training_op, feed_dict={X:X_batch, y:y_batch})
+
+        if epoch%10 == 0:
+            train_summary_str = train_accuracy_summary.eval(feed_dict={X: X_batch, y:y_batch})
+            validation_summary_str = validation_accuracy_summary.eval(feed_dict={X: X_batch, y:y_batch}) 
+            file_writer.add_summary(train_summary_str, epoch)
+            file_writer.add_summary(validation_summary_str, epoch)
+
+            acc_train = accuracy.eval(feed_dict={X:X_batch, y:y_batch})
+            acc_val = accuracy.eval(feed_dict={X:mnist.validation.images,
                                            y:mnist.validation.labels})
-        print(epoch, "Train accuracy:", acc_train, "Val accuracy:", acc_val)
-    save_path = saver.save(sess, "./my_model_final.ckpt")
+            print(epoch, "Train accuracy:", acc_train, "Val accuracy:", acc_val)
+    save_path = saver.save(sess, "./model/my_model_final.ckpt")
