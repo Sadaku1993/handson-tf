@@ -16,6 +16,7 @@ with tf.Session() as sess:
     entropy_output = sess.run(entropy_loss, feed_dict={target:y, predict:x})
     entropy_output_ = sess.run(entropy_loss, feed_dict={target:y_, predict:x})
 
-plt.plot(x, entropy_output, 'g--', label='CROSS ENTROPY LOSS (label=1)')
-plt.plot(x, entropy_output_, 'r--', label='CROSS ENTROPY LOSS (label=0)')
+plt.plot(x, entropy_output_, 'r--', label='LOGISTIC LOSS (label=0)')
+plt.plot(x, entropy_output, 'g--', label='LOGISTIC LOSS (label=1)')
+plt.legend(loc='lower right', prop={'size': 11})
 plt.show()

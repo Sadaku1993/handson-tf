@@ -27,4 +27,5 @@ with tf.Session() as sess:
 plt.plot(x, l1_output, 'b--', label='L1 LOSS')
 plt.plot(x, l2_output, 'r--', label='L2 LOSS')
 plt.plot(x, huber_output, 'g--', label='Huber LOSS')
+plt.legend(loc='lower right', prop={'size': 11})
 plt.show()
